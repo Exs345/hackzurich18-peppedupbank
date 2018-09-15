@@ -1,6 +1,7 @@
 from stk import runner
 
 import microsoft_face
+import creditsuisse
 
 import qi
 import time
@@ -41,6 +42,7 @@ class PepUpBank(object):
 
         self.lastTime = time.time()
         self.counter = 0
+        self.creditsuisse = credit_suisse()
 
         microsoft_face.init()
 
@@ -84,7 +86,6 @@ class PepUpBank(object):
 
             video_service.unsubscribe(videoClient)
 
-
             # Now we work with the image returned and save it as a PNG  using ImageDraw
             # package.
 
@@ -97,14 +98,28 @@ class PepUpBank(object):
             # Create a PIL Image from our pixel array.
             im = Image.frombytes("RGB", (imageWidth, imageHeight), image_string)
 
-            # Save the image.
-            im.save("/data/home/nao/.local/share/PackageManager/apps/peppedupbank/imgs/image#"+ str(self.counter) +".png", "PNG")
-
-            im.show()
-
-            print("Identifying image#" + str(counter) + microsoft_face.identify_person("/data/home/nao/.local/share/PackageManager/apps/peppedupbank/imgs/image#"+ str(self.counter) +".png"))
-
+            imageName = "/data/home/nao/.local/share/PackageManager/apps/peppedupbank/imgs/image#"+ str(self.counter) +".png"
             self.counter += 1
+
+            # Save the image.
+            im.save(imageName, "PNG")
+
+            print("Trying to identify person ...")
+            customerId = int(microsoft_face.identify_person(imageName))
+            if customerId == None:
+                print("No person identified.")
+            else
+                print("Found customer %s" % (customerId))
+
+                self.creditsuisse.get_user_data(customerId)
+
+                for obj in res['object']:
+                    print(obj)
+
+                    self.tts.say("Hello %u %u!" % (obj['surname'], obj['lastname']))
+
+                    break
+
             # get customer position
 
 
