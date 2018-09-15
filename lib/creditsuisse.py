@@ -56,7 +56,12 @@ class credit_suisse:
 
 def main():
 	cs = credit_suisse()
-	print(cs.get_user_data(600014))
+	res =cs.get_user_data(600028)
+
+	for obj in res['object']:
+		print(obj)
+
+
 
 
 if __name__ == "__main__":
