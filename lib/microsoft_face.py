@@ -67,17 +67,23 @@ def get_person(personId):
 
 
 def identify_person(image):
-	res = []
+	try:
+		faces = CF.face.detect(image)
 
-	faces = CF.face.detect(image)
-	faces = CF.face.identify([face['faceId'] for face in faces], large_person_group_id=config.COGNITIVE_FACE_LARGE_PERSON_GROUP_ID)
+		if len(faces) == 0:
+			return []
 
-	for face in faces:
-		for candidate in face['candidates']:
-			#print(candidate)
-			candidate.update(get_person(candidate['personId']))
+		faces = CF.face.identify([face['faceId'] for face in faces], large_person_group_id=config.COGNITIVE_FACE_LARGE_PERSON_GROUP_ID)
 
-	return faces
+		for face in faces:
+			for candidate in face['candidates']:
+				#print(candidate)
+				candidate.update(get_person(candidate['personId']))
+
+		return faces
+	except CF.util.CognitiveFaceException as e:
+		sys.stderr.write("Face identification failed due to: {}\n".format(str(e)))
+		return []
 
 def most_likely_person(faces):
 	if len(faces) > 0:
