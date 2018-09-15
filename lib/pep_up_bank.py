@@ -49,14 +49,44 @@ class PepUpBank(object):
         self.logger.setLevel(logging.DEBUG)
         # self.logger.addHandler(logging.StreamHandler())
 
+        ledname = 'ChestLeds'
+        self.leds.on(ledname)
+        self.leds.fadeRGB(ledname, 0.0, 1.0, 0.0, 0)
+
+        self.tabletService = self.session.service("ALTabletService")
         self.face_detection = self.session.service("ALFaceDetection")
         self.face_detection.subscribe("PepUpBank")
 
-    # def reach_customer(self):
-    #     return
-    #
-    # def handle_customer(self):
-    #     return
+    def handle_customer(self, customer):
+
+        try:
+            self.tabletService.showWebview("http://198.18.0.1/apps/peppedupbank/index.html")
+
+            time.sleep(3)
+
+            # Javascript script for displaying a prompt
+            # ALTabletBinding is a javascript binding inject in the web page displayed on the tablet
+            script = """
+                console.log("ah");
+
+                var imgScr = "imgs/image"+"""+ str(self.counter)+""" +".png";
+                document.getElementById("image").src = imgScr;
+
+                var d = new Date(); var hours = d.getHours();
+                var greeting = (hours < 12 )? "Good morning" : ((hours > 17) ? "Good evening" : "Good afternoon");
+                greeting += ", " + """+customer['surname']+""" + " " + """+customer['lastname']+""";
+                documentgetElementById("greeting").html(greeting);
+            """
+
+
+            # inject and execute the javascript in the current web page displayed
+            self.tabletService.executeJS(script)
+
+        except Exception, e:
+            print "Error was:", e
+
+        # Hide the web view
+        #self.tabletService.hideWebview()
 
     def on_human_tracked(self, value):
         #print("on_human_tracked(%s)" % (value))
@@ -80,13 +110,11 @@ class PepUpBank(object):
             colorSpace = 11   # RGB
 
             videoClient = self.video_service.subscribe("python_client", resolution, colorSpace, 5)
-
             t0 = time.time()
 
             # Get a camera image.
             # image[6] contains the image data passed as an array of ASCII chars.
             naoImage = self.video_service.getImageRemote(videoClient)
-
             t1 = time.time()
 
             # Time the image transfer.
@@ -95,7 +123,7 @@ class PepUpBank(object):
 
             ledname = 'ChestLeds'
             self.leds.on(ledname)
-            self.leds.fadeRGB(ledname, 1.0, 0.0, 0.0, 0);
+            self.leds.fadeRGB(ledname, 1.0, 0.0, 0.0, 0)
 
             # Now we work with the image returned and save it as a PNG  using ImageDraw
             # package.
@@ -109,7 +137,7 @@ class PepUpBank(object):
             # Create a PIL Image from our pixel array.
             im = Image.frombytes("RGB", (imageWidth, imageHeight), image_string)
 
-            imageName = "/data/home/nao/.local/share/PackageManager/apps/peppedupbank/imgs/image#"+ str(self.counter) +".png"
+            imageName = "/data/home/nao/.local/share/PackageManager/apps/peppedupbank/html/imgs/image"+ str(self.counter) +".png"
             self.counter += 1
 
             # Save the image.
@@ -129,7 +157,7 @@ class PepUpBank(object):
 
                 for obj in userData['object']:
                     self.tts.say("You must be %s %s!" % (obj['surname'], obj['lastname']))
-
+                    self.handle_customer(obj)
                     break
 
             self.leds.off(ledname)
