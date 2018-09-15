@@ -19,6 +19,15 @@
         <File name="pepper60023" src="pepper60023.py" />
         <File name="pepper60028" src="pepper60028.py" />
         <File name="pepper60043" src="pepper60043.py" />
+        <File name="creditsuisse" src="lib/creditsuisse.py" />
+        <File name="pepper" src="pepper.py" />
+        <File name="pepper" src="peppercreditsuiseapi/pepper.py" />
+        <File name="pepper60014" src="peppercreditsuiseapi/pepper60014.py" />
+        <File name="pepper60023" src="peppercreditsuiseapi/pepper60023.py" />
+        <File name="pepper60028" src="peppercreditsuiseapi/pepper60028.py" />
+        <File name="pepper60043" src="peppercreditsuiseapi/pepper60043.py" />
+        <File name="pepperrun" src="peppercreditsuiseapi/pepperrun.py" />
+        <File name="pepperrun" src="pepperrun.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />

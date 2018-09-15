@@ -14,7 +14,7 @@ PEPPER_IP = "127.0.0.1"
 PEPPER_PORT = 9559
 CONNECTION_URL = "tcp://" + PEPPER_IP + ":" + str(PEPPER_PORT)
 
-counter = 0
+
 
 class PepUpBank(object):
     """
@@ -40,6 +40,7 @@ class PepUpBank(object):
         self.got_face = False
 
         self.lastTime = time.time()
+        self.counter = 0
 
         microsoft_face.init()
 
@@ -55,7 +56,7 @@ class PepUpBank(object):
         """
         if value == []:  # empty value when the face disappears
             self.got_face = False
-        elif time.time() > self.lastTime+3 and not self.got_face:  # only speak the first time a face appears
+        elif time.time() > self.lastTime+5 and not self.got_face:  # only speak the first time a face appears
             self.got_face = True
 
             # get face image
@@ -97,12 +98,13 @@ class PepUpBank(object):
             im = Image.frombytes("RGB", (imageWidth, imageHeight), image_string)
 
             # Save the image.
-            im.save("/data/home/nao/.local/share/PackageManager/apps/peppedupbank/imgs/image#"+ counter +".png", "PNG")
+            im.save("/data/home/nao/.local/share/PackageManager/apps/peppedupbank/imgs/image#"+ str(self.counter) +".png", "PNG")
 
             im.show()
 
-            print(microsoft_face.identify_person("/data/home/nao/.local/share/PackageManager/apps/peppedupbank/imgs/image#"+ (counter++) +".png"))
+            print("Identifying image#" + str(counter) + microsoft_face.identify_person("/data/home/nao/.local/share/PackageManager/apps/peppedupbank/imgs/image#"+ str(self.counter) +".png"))
 
+            self.counter += 1
             # get customer position
 
 
