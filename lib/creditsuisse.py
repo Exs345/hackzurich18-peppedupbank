@@ -38,11 +38,6 @@ class credit_suisse:
 		res = self.request('POST', url = '/customers/search/unsecured', input = {
 		"filter" : [
 			{
-				"attribute": "kyc.job" ,
-				"operator": "like" ,
-				"value": "'%RETIRED%'"
-			},
-			{
 				"attribute": "id" ,
 				"operator": "like" ,
 				"value": userId
