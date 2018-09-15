@@ -87,11 +87,15 @@ def most_likely_person(faces):
 
 	return None
 
+def init():
+	CF.Key.set(config.COGNITIVE_FACE_KEY)
+	CF.BaseUrl.set(config.COGNITIVE_FACE_BASE_URL)
+
+
 def main():
 	args = parse_arguments()
 
-	CF.Key.set(config.COGNITIVE_FACE_KEY)
-	CF.BaseUrl.set(config.COGNITIVE_FACE_BASE_URL)
+	init()
 
 	if (args.action[0] == 'create'):
 		create_person(args.name)
