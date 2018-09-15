@@ -39,7 +39,6 @@ class PepUpBank(object):
         self.leds = self.session.service("ALLeds")
         self.video_service = self.session.service("ALVideoDevice")
         self.got_face = False
-        self.counter = 0
         self.creditsuisse = creditsuisse.credit_suisse()
         microsoft_face.init()
         self.mutex = Lock()
@@ -53,40 +52,21 @@ class PepUpBank(object):
         self.leds.on(ledname)
         self.leds.fadeRGB(ledname, 0.0, 1.0, 0.0, 0)
 
+        self.memory = self.session.service("ALMemory")
         self.tabletService = self.session.service("ALTabletService")
         self.face_detection = self.session.service("ALFaceDetection")
         self.face_detection.subscribe("PepUpBank")
 
     def handle_customer(self, customer):
-
         try:
             self.tabletService.showWebview("http://198.18.0.1/apps/peppedupbank/index.html")
-
+            self.tabletService.reloadPage(True)
             time.sleep(3)
-
-            # Javascript script for displaying a prompt
-            # ALTabletBinding is a javascript binding inject in the web page displayed on the tablet
-            script = """
-                console.log("ah");
-
-                var imgScr = "imgs/image"+"""+ str(self.counter)+""" +".png";
-                document.getElementById("image").src = imgScr;
-
-                var d = new Date(); var hours = d.getHours();
-                var greeting = (hours < 12 )? "Good morning" : ((hours > 17) ? "Good evening" : "Good afternoon");
-                greeting += ", " + """+customer['surname']+""" + " " + """+customer['lastname']+""";
-                documentgetElementById("greeting").html(greeting);
-            """
-
-
-            # inject and execute the javascript in the current web page displayed
-            self.tabletService.executeJS(script)
+            self.memory.raiseEvent("CustomerData", [customer['surname'], customer['lastname']])
 
         except Exception, e:
             print "Error was:", e
 
-        # Hide the web view
-        #self.tabletService.hideWebview()
 
     def on_human_tracked(self, value):
         #print("on_human_tracked(%s)" % (value))
@@ -137,8 +117,7 @@ class PepUpBank(object):
             # Create a PIL Image from our pixel array.
             im = Image.frombytes("RGB", (imageWidth, imageHeight), image_string)
 
-            imageName = "/data/home/nao/.local/share/PackageManager/apps/peppedupbank/html/imgs/image"+ str(self.counter) +".png"
-            self.counter += 1
+            imageName = "/data/home/nao/.local/share/PackageManager/apps/peppedupbank/html/imgs/image.png"
 
             # Save the image.
             im.save(imageName, "PNG")
