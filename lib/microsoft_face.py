@@ -69,7 +69,7 @@ def get_person(personId):
 def identify_person(image):
 	res = []
 
-	faces = CF.face.detect('IMG_6909.jpg')
+	faces = CF.face.detect(image)
 	faces = CF.face.identify([face['faceId'] for face in faces], large_person_group_id=config.COGNITIVE_FACE_LARGE_PERSON_GROUP_ID)
 
 	for face in faces:
