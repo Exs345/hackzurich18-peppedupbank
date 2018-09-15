@@ -2,7 +2,9 @@ from stk import runner
 
 import microsoft_face
 import creditsuisse
+import logging
 
+from threading import Lock
 import qi
 import time
 import sys
@@ -14,8 +16,6 @@ import almath
 PEPPER_IP = "127.0.0.1"
 PEPPER_PORT = 9559
 CONNECTION_URL = "tcp://" + PEPPER_IP + ":" + str(PEPPER_PORT)
-
-
 
 class PepUpBank(object):
     """
@@ -36,15 +36,21 @@ class PepUpBank(object):
         self.subscriber.signal.connect(self.on_human_tracked)
         # Get the services ALTextToSpeech and ALFaceDetection.
         self.tts = self.session.service("ALTextToSpeech")
+        self.leds = self.session.service("ALLeds")
+        self.video_service = self.session.service("ALVideoDevice")
+        self.got_face = False
+        self.counter = 0
+        self.creditsuisse = creditsuisse.credit_suisse()
+        microsoft_face.init()
+        self.mutex = Lock()
+
+        logging.basicConfig(format="%(asctime)s [%(threadName)-10s] %(levelname)-6s %(message)s")
+        self.logger = logging.getLogger("PepUpBank")
+        self.logger.setLevel(logging.DEBUG)
+        # self.logger.addHandler(logging.StreamHandler())
+
         self.face_detection = self.session.service("ALFaceDetection")
         self.face_detection.subscribe("PepUpBank")
-        self.got_face = False
-
-        self.lastTime = time.time()
-        self.counter = 0
-        self.creditsuisse = credit_suisse()
-
-        microsoft_face.init()
 
     # def reach_customer(self):
     #     return
@@ -53,38 +59,43 @@ class PepUpBank(object):
     #     return
 
     def on_human_tracked(self, value):
+        #print("on_human_tracked(%s)" % (value))
+
         """
         Callback for event FaceDetected.
         """
         if value == []:  # empty value when the face disappears
             self.got_face = False
-        elif time.time() > self.lastTime+5 and not self.got_face:  # only speak the first time a face appears
+        elif not self.got_face:  # only speak the first time a face appears
             self.got_face = True
-
+            if self.mutex.acquire(False) == False:
+                return
             # get face image
             """
             First get an image, then show it on the screen with PIL.
             """
             # Get the service ALVideoDevice.
 
-            video_service = self.session.service("ALVideoDevice")
             resolution = 2    # VGA
             colorSpace = 11   # RGB
 
-            videoClient = video_service.subscribe("python_client", resolution, colorSpace, 5)
+            videoClient = self.video_service.subscribe("python_client", resolution, colorSpace, 5)
 
             t0 = time.time()
 
             # Get a camera image.
             # image[6] contains the image data passed as an array of ASCII chars.
-            naoImage = video_service.getImageRemote(videoClient)
+            naoImage = self.video_service.getImageRemote(videoClient)
 
             t1 = time.time()
 
             # Time the image transfer.
-            print "acquisition delay ", t1 - t0
 
-            video_service.unsubscribe(videoClient)
+            self.video_service.unsubscribe(videoClient)
+
+            ledname = 'ChestLeds'
+            self.leds.on(ledname)
+            self.leds.fadeRGB(ledname, 1.0, 0.0, 0.0, 0);
 
             # Now we work with the image returned and save it as a PNG  using ImageDraw
             # package.
@@ -104,49 +115,25 @@ class PepUpBank(object):
             # Save the image.
             im.save(imageName, "PNG")
 
-            print("Trying to identify person ...")
-            customerId = int(microsoft_face.identify_person(imageName))
+            self.tts.say("Hi!")
+            self.logger.info("Trying to identify person ...")
+            customerId = microsoft_face.most_likely_person(microsoft_face.identify_person(imageName))
             if customerId == None:
-                print("No person identified.")
-            else
-                print("Found customer %s" % (customerId))
+                self.logger.info("No person identified.")
+                self.tts.say("I never saw you before! Nice to meet you!")
+            else:
+                customerId = int(customerId)
+                self.logger.info("Found customer %s" % (customerId))
 
-                self.creditsuisse.get_user_data(customerId)
+                userData = self.creditsuisse.get_user_data(customerId)
 
-                for obj in res['object']:
-                    print(obj)
-
-                    self.tts.say("Hello %u %u!" % (obj['surname'], obj['lastname']))
+                for obj in userData['object']:
+                    self.tts.say("You must be %s %s!" % (obj['surname'], obj['lastname']))
 
                     break
 
-            # get customer position
-
-
-
-            # reach_customer()
-            # handle_customer() # which adds face to visited (start ignoring this face)
-
-            # print "I saw a face!"
-            # self.tts.say("Hello, you!")
-            # # First Field = TimeStamp.
-            # timeStamp = value[0]
-            # print "TimeStamp is: " + str(timeStamp)
-            #
-            # # Second Field = array of face_Info's.
-            # faceInfoArray = value[1]
-            # for j in range( len(faceInfoArray)-1 ):
-            #     faceInfo = faceInfoArray[j]
-            #
-            #     # First Field = Shape info.
-            #     faceShapeInfo = faceInfo[0]
-            #
-            #     # Second Field = Extra info (empty for now).
-            #     faceExtraInfo = faceInfo[1]
-            #
-            #     print "Face Infos :  alpha %.3f - beta %.3f" % (faceShapeInfo[1], faceShapeInfo[2])
-            #     print "Face Infos :  width %.3f - height %.3f" % (faceShapeInfo[3], faceShapeInfo[4])
-            #     print "Face Extra Infos :" + str(faceExtraInfo)
+            self.leds.off(ledname)
+            self.mutex.release()
 
     def run(self):
         """
@@ -161,9 +148,6 @@ class PepUpBank(object):
             self.face_detection.unsubscribe("PepUpBank")
             #stop
             sys.exit(0)
-
-
-
 
 if __name__ == "__main__":
     try:
