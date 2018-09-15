@@ -1,0 +1,3 @@
+COGNITIVE_FACE_KEY = 'topsecretkey'
+COGNITIVE_FACE_BASE_URL = 'https://awesome.api
+COGNITIVE_FACE_LARGE_PERSON_GROUP_ID = 'mylargepersongroupid'
