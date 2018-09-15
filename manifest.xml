@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.0.0" uuid="peppedupbank">
+<package uuid="peppedupbank" version="0.0.0">
  <names>
   <name lang="en_US">PeppedUpBank</name>
  </names>
@@ -17,6 +17,6 @@
   </behaviorContent>
  </contents>
  <services>
-  <service name="PepUpBank" autorun="true" execStart="/usr/bin/python2 lib/pep_up_bank.py"/>
+  <service autorun="true" name="PepUpBank" execStart="/usr/bin/python2 lib/pep_up_bank.py"/>
  </services>
 </package>

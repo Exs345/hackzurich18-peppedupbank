@@ -1,5 +1,7 @@
 from stk import runner
 
+import microsoft_face
+
 import qi
 import time
 import sys
@@ -11,6 +13,8 @@ import almath
 PEPPER_IP = "127.0.0.1"
 PEPPER_PORT = 9559
 CONNECTION_URL = "tcp://" + PEPPER_IP + ":" + str(PEPPER_PORT)
+
+counter = 0
 
 class PepUpBank(object):
     """
@@ -35,6 +39,10 @@ class PepUpBank(object):
         self.face_detection.subscribe("PepUpBank")
         self.got_face = False
 
+        self.lastTime = time.time()
+
+        microsoft_face.init()
+
     # def reach_customer(self):
     #     return
     #
@@ -47,7 +55,7 @@ class PepUpBank(object):
         """
         if value == []:  # empty value when the face disappears
             self.got_face = False
-        elif not self.got_face:  # only speak the first time a face appears
+        elif time.time() > self.lastTime+3 and not self.got_face:  # only speak the first time a face appears
             self.got_face = True
 
             # get face image
@@ -89,39 +97,13 @@ class PepUpBank(object):
             im = Image.frombytes("RGB", (imageWidth, imageHeight), image_string)
 
             # Save the image.
-            im.save("camImage.png", "PNG")
+            im.save("/data/home/nao/.local/share/PackageManager/apps/peppedupbank/imgs/image#"+ counter +".png", "PNG")
 
             im.show()
 
-            # get customer position
+            print(microsoft_face.identify_person("/data/home/nao/.local/share/PackageManager/apps/peppedupbank/imgs/image#"+ (counter++) +".png"))
 
-            # Retrieve landmark center position in radians.
-            # wzCamera = faceInfoArray[1][0][0][1] # replaced markData with faceInfoArray, no idea if this works
-            # wyCamera = faceInfoArray[1][0][0][2] # replaced markData with faceInfoArray, no idea if this works
-            #
-            # # Retrieve landmark angular size in radians.
-            # angularSize = faceInfoArray[1][0][0][3] # replaced markData with faceInfoArray, no idea if this works
-            #
-            # # Compute distance to landmark.
-            # distanceFromCameraToLandmark = self.landmarkTheoreticalSize / ( 2 * math.tan( angularSize / 2))
-            #
-            # # Get current camera position in NAO space.
-            # transform = self.motion_service.getTransform(self.currentCamera, 2, True)
-            # transformList = almath.vectorFloat(transform)
-            # robotToCamera = almath.Transform(transformList)
-            #
-            # # Compute the rotation to point towards the landmark.
-            # cameraToLandmarkRotationTransform = almath.Transform_from3DRotation(0, wyCamera, wzCamera)
-            #
-            # # Compute the translation to reach the landmark.
-            # cameraToLandmarkTranslationTransform = almath.Transform(distanceFromCameraToLandmark, 0, 0)
-            #
-            # # Combine all transformations to get the landmark position in NAO space.
-            # robotToLandmark = robotToCamera * cameraToLandmarkRotationTransform *cameraToLandmarkTranslationTransform
-            #
-            # print "x " + str(robotToLandmark.r1_c4) + " (in meters)"
-            # print "y " + str(robotToLandmark.r2_c4) + " (in meters)"
-            # print "z " + str(robotToLandmark.r3_c4) + " (in meters)"
+            # get customer position
 
 
 
@@ -167,7 +149,6 @@ class PepUpBank(object):
 
 
 if __name__ == "__main__":
-    print "Hahahaha"
     try:
         # Initialize qi framework.
         app = qi.Application(["PepUpBank", "--qi-url=" + CONNECTION_URL])

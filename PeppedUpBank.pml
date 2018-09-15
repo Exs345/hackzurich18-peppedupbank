@@ -7,6 +7,18 @@
     <Dialogs />
     <Resources>
         <File name="pep_up_bank" src="lib/pep_up_bank.py" />
+        <File name="__init__" src="lib/stk/__init__.py" />
+        <File name="coroutines" src="lib/stk/coroutines.py" />
+        <File name="events" src="lib/stk/events.py" />
+        <File name="logging" src="lib/stk/logging.py" />
+        <File name="runner" src="lib/stk/runner.py" />
+        <File name="services" src="lib/stk/services.py" />
+        <File name="config" src="lib/config.py" />
+        <File name="microsoft_face" src="lib/microsoft_face.py" />
+        <File name="pepper60014" src="pepper60014.py" />
+        <File name="pepper60023" src="pepper60023.py" />
+        <File name="pepper60028" src="pepper60028.py" />
+        <File name="pepper60043" src="pepper60043.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />
