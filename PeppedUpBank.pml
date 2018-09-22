@@ -28,6 +28,20 @@
         <File name="pepper60043" src="peppercreditsuiseapi/pepper60043.py" />
         <File name="pepperrun" src="peppercreditsuiseapi/pepperrun.py" />
         <File name="pepperrun" src="pepperrun.py" />
+        <File name="config.cpython-36" src="lib/__pycache__/config.cpython-36.pyc" />
+        <File name="index" src="html/index.html" />
+        <File name="VID_20180915_002636" src="videos/VID_20180915_002636.mp4" />
+        <File name="VID_20180915_002714" src="videos/VID_20180915_002714.mp4" />
+        <File name="VID_20180915_002808" src="videos/VID_20180915_002808.mp4" />
+        <File name="main" src="html/css/main.css" />
+        <File name="end" src="html/end.html" />
+        <File name="jquery.color.plus-names-2.1.2.min" src="html/js/jquery.color.plus-names-2.1.2.min.js" />
+        <File name="jquery.easing.1.3" src="html/js/jquery.easing.1.3.js" />
+        <File name="jquery.min" src="html/js/jquery.min.js" />
+        <File name="main" src="html/js/main.js" />
+        <File name="robotutils" src="html/js/robotutils.js" />
+        <File name="new" src="html/new.html" />
+        <File name="success" src="html/success.html" />
     </Resources>
     <Topics />
     <IgnoredPaths />
